@@ -24,12 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Dump version
-        run: git describe --abbrev=0 | tail -c +2 > version && cat version
-      - run: npm install
-      - uses: lannonbr/vsce-action@3.0.0
-        with:
-          # using the git tag as a version, dropping the first character (v)
-          args: "publish -p $VSCE_TOKEN --no-git-tag-version `cat version`"
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" | tail -c +2 >> $GITHUB_ENV
+      - run: |
+          npm i -g vsce
+          npm install
+          publish -p $VSCE_TOKEN --no-git-tag-version $RELEASE_VERSION
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
