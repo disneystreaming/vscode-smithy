@@ -1,0 +1,33 @@
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    branches: ["*"]
+
+name: Build and deploy
+jobs:
+  build:
+    if: github.event_name == 'pull_request'
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: install # will run `yarn install` command
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: build # will run `yarn build` command
+
+  deploy:
+    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm install
+      - uses: lannonbr/vsce-action@3.0.0
+        with:
+          # using the git tag as a version, dropping the first character (v)
+          args: "publish -p $VSCE_TOKEN --no-git-tag-version `git describe --abbrev=0 | tail -c +2`"
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
