@@ -29,6 +29,6 @@ jobs:
       - run: |
           npm i -g vsce
           npm install
-          publish -p $VSCE_TOKEN --no-git-tag-version $RELEASE_VERSION
+          vsce publish -p $VSCE_TOKEN --no-git-tag-version $RELEASE_VERSION
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
