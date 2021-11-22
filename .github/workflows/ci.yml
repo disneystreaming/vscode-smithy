@@ -34,6 +34,6 @@ jobs:
       - name: Publish
         run: |
           echo $RELEASE_VERSION
-          vsce publish -p $VSCE_TOKEN --no-git-tag-version $RELEASE_VERSION
+          vsce publish -p $VSCODE_TOKEN --no-git-tag-version $RELEASE_VERSION
         env:
-          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
+          VSCODE_TOKEN: ${{ secrets.VSCODE_TOKEN }}
