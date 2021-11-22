@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/:1}" >> $GITHUB_ENV
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Install npm
         run: |
           npm i -g vsce
@@ -34,6 +34,6 @@ jobs:
       - name: Publish
         run: |
           echo $RELEASE_VERSION
-          vsce publish -p $VSCODE_TOKEN --no-git-tag-version $RELEASE_VERSION
+          vsce publish -p $VSCODE_TOKEN --no-git-tag-version ${RELEASE_VERSION:1}
         env:
           VSCODE_TOKEN: ${{ secrets.VSCODE_TOKEN }}
