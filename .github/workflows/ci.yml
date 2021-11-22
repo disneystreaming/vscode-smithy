@@ -23,6 +23,8 @@ jobs:
     if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     steps:
+      - name: Install git
+        run: sudo apt-get install -y git
       - uses: actions/checkout@v2
       - run: npm install
       - uses: lannonbr/vsce-action@3.0.0
