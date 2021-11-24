@@ -42,7 +42,7 @@
 				"smithyLsp.version": {
 					"scope": "window",
 					"type": "string",
-					"default": "0.0.0-cb3ffec",
+					"default": "latest.release",
 					"description": "Version of the Smithy LSP (see https://github.com/disneystreaming/smithy-language-server)"
 				}
 			}
