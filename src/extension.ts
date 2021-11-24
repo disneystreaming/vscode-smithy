@@ -25,6 +25,7 @@ import {
 	TextDocumentIdentifier
 } from 'vscode-languageclient';
 import { Address } from 'cluster';
+import { exit, exitCode } from 'process';
 
 let client: LanguageClient;
 
@@ -66,26 +67,34 @@ export function activate(context: ExtensionContext) {
 				let port = (server.address() as net.AddressInfo).port
 
 				let version = vscode.workspace.getConfiguration('smithyLsp').get("version", "`")
-				console.log("Launching Smithy LSP version " + version)
-				let args = ["launch", "com.disneystreaming.smithy:smithy-language-server:" + version].concat([
-					"-r", "m2Local",
-					"--",
-					port.toString()
-				])
 
-				let childProcess = child_process.spawn(launcherPath, args, options);
+				// Downloading latest poms
+				let resolveArgs = ["resolve", "--mode", "force", "com.disneystreaming.smithy:smithy-language-server:" + version, "-r", "m2local"]
+				let resolveProcess = child_process.spawn(launcherPath, resolveArgs, options)
+				resolveProcess.on('exit', exitCode => {
+					console.log("Exit code : " + exitCode)
+					if (exitCode == 0) {
+						console.log("Launching smithy-language-server version:" + version)
 
-				childProcess.stdout.on('data', (data) => {
-					console.log(`stdout: ${data}`);
-				});
+						let launchargs = ["launch", "com.disneystreaming.smithy:smithy-language-server:" + version, "-r", "m2local", "--", port.toString()]
 
-				childProcess.stderr.on('data', (data) => {
-					console.error(`stderr: ${data}`);
-				});
+						let childProcess = child_process.spawn(launcherPath, launchargs, options);
 
-				childProcess.on('close', (code) => {
-					console.log(`child process exited with code ${code}`);
-				});
+						childProcess.stdout.on('data', (data) => {
+							console.log(`stdout: ${data}`);
+						});
+
+						childProcess.stderr.on('data', (data) => {
+							console.error(`stderr: ${data}`);
+						});
+
+						childProcess.on('close', (code) => {
+							console.log(`LSP exited with code ${code}`);
+						});
+					} else {
+						console.log(`Could not resolve smithy-language-server implementation`)
+					}
+				})
 
 				// Send raw output to a file
 				if (!fs.existsSync(context.storagePath))
@@ -99,8 +108,8 @@ export function activate(context: ExtensionContext) {
 		// Register the server for plain text documents
 		documentSelector: [{ scheme: 'file', language: 'smithy' }, { scheme: 'smithyjar', language: 'smithy' }],
 		synchronize: {
-			// Notify the server about file changes to '.clientrc files contained in the workspace
-			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+			// Notify the server about file changes to 'smithy-build.json' or 'smithy.json' files contained in the workspace
+			fileEvents: workspace.createFileSystemWatcher('**/{smithy-build, smithy}.json')
 		}
 	};
 
