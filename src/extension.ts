@@ -99,8 +99,8 @@ export function activate(context: ExtensionContext) {
 		// Register the server for plain text documents
 		documentSelector: [{ scheme: 'file', language: 'smithy' }, { scheme: 'smithyjar', language: 'smithy' }],
 		synchronize: {
-			// Notify the server about file changes to '.clientrc files contained in the workspace
-			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+			// Notify the server about file changes to 'smithy-build.json' or 'smithy.json' files contained in the workspace
+			fileEvents: workspace.createFileSystemWatcher('**/{smithy-build, smithy}.json')
 		}
 	};
 
