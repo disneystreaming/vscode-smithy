@@ -2,7 +2,7 @@
 
 [Smithy](https://awslabs.github.io/smithy/) is an open-source protocol-agnostic interface definition language maintained and published by AWS.
 
-This VSCode extension provides syntax coloring and rich editor features when editing .smithy files files.
+This VSCode extension provides syntax coloring and rich editor features when editing .smithy files.
 
 It works by communicating to a language-server published in
 https://github.com/disneystreaming/smithy-language-server/
