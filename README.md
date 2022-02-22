@@ -17,3 +17,21 @@ https://github.com/disneystreaming/smithy-language-server/
 	* Basic auto-completion
 * Simple grammar for Smithy syntax highlighting
 
+
+## Smithy build
+
+You can configure your Smithy projects using a Smithy build file. This build file is a JSON file has the following structure:
+
+- imports: `Array[String]` - ???
+- mavenDependencies: `Array[String]` - maven dependencies that contains Smithy definitions
+- mavenRepositories: `Array[String]` - maven repositories to fetch mavenDependencies from
+
+An example Smithy build file looks like this:
+
+```json
+{
+	"imports": [""],
+	"mavenDependencies": ["com.disneystreaming.smithy4s:smithy4s-protocol_2.13:latest.stable"],
+	"mavenRepositories": ["https://full.url.to.your.mavenrepository.tld"]
+}
+```
