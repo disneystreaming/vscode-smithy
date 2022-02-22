@@ -4,7 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from "path";
-import * as https from "https";
+import { https } from "follow-redirects";
+import { IncomingMessage } from "http";
 import * as net from "net";
 import * as fs from "fs";
 import * as child_process from "child_process";
@@ -115,7 +116,7 @@ export function activate(context: ExtensionContext) {
       });
     }
 
-    return getCoursier(context.extensionPath).then((binaryPath) =>
+    return getCoursier(context.extensionPath, "v2.0.6").then((binaryPath) =>
       startServer(binaryPath)
     );
   }
@@ -181,17 +182,17 @@ function createSmithyContentProvider(
   };
 }
 
-function getCoursier(extensionPath: string): Promise<string> {
+function getCoursier(
+  extensionPath: string,
+  versionPath: string
+): Promise<string> {
   function binPath(filename: string) {
     return path.join(extensionPath, filename);
   }
   const urls = {
-    darwin:
-      "https://github.com/coursier/coursier/releases/download/v2.0.6/cs-x86_64-apple-darwin",
-    linux:
-      "https://github.com/coursier/coursier/releases/download/v2.0.6/cs-x86_64-pc-linux",
-    win32:
-      "https://github.com/coursier/coursier/releases/download/v2.0.6/cs-x86_64-pc-win32.exe",
+    darwin: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-apple-darwin`,
+    linux: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-linux`,
+    win32: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-win32.exe`,
   };
   const targets = {
     darwin: binPath("coursier"),
@@ -202,57 +203,54 @@ function getCoursier(extensionPath: string): Promise<string> {
 }
 
 function downloadFile(url: string, targetFile: string): Promise<string> {
-  function get(
-    url: string,
-    resolve: (res: string) => void,
-    reject: (err: Error) => void
-  ) {
-    https.get(url, (response) => {
-      if (response.statusCode === 301 || response.statusCode === 302) {
-        const newUrl = response.headers.location;
-        console.log(`Following redirection to ${newUrl}.`);
-        return get(newUrl, resolve, reject);
-      } else if (response.statusCode === 200) {
-        const file = fs.createWriteStream(targetFile, {
-          flags: "wx",
-          mode: 0o755,
-        });
-        response.pipe(file);
+  function promiseGet(url: string): Promise<IncomingMessage> {
+    return new Promise((resolve, reject) => {
+      https.get(url, (response) => {
+        if (response.statusCode === 200) {
+          resolve(response);
+        } else {
+          reject(
+            new Error(
+              `Server responded with ${response.statusCode}: ${response.statusMessage}`
+            )
+          );
+        }
+      });
+    });
+  }
 
-        file.on("finish", () => {
-          console.log(`Finished downloaded file at ${targetFile}`);
+  function writeToDisk(response: IncomingMessage): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const file = fs.createWriteStream(targetFile, {
+        flags: "wx",
+        mode: 0o755,
+      });
+      response.pipe(file);
+
+      file.on("finish", () => {
+        console.log(`Finished downloaded file at ${targetFile}`);
+        resolve(targetFile);
+      });
+
+      file.on("error", (err) => {
+        if (file) {
+          file.close();
+          fs.unlink(targetFile, () => {}); // Delete temp file
+        }
+
+        if (err.code === "EEXIST") {
+          console.log(`File already exists at ${targetFile}`);
           resolve(targetFile);
-        });
-
-        file.on("error", (err) => {
-          if (file) {
-            file.close();
-            fs.unlink(targetFile, () => {}); // Delete temp file
-          }
-
-          if (err.code === "EEXIST") {
-            console.log(`File already exists at ${targetFile}`);
-            resolve(targetFile);
-          } else {
-            console.error(`File error while downloading file at ${targetFile}`);
-            console.error(err);
-            reject(err);
-          }
-        });
-      } else {
-        console.log(`OOPS got ${response.statusCode}`);
-        reject(
-          new Error(
-            `Server responded with ${response.statusCode}: ${response.statusMessage}`
-          )
-        );
-      }
+        } else {
+          console.error(`File error while downloading file at ${targetFile}`);
+          console.error(err);
+          reject(err);
+        }
+      });
     });
   }
   // adapted from https://stackoverflow.com/a/45007624
-  return new Promise((resolve, reject) => {
-    get(url, resolve, reject);
-  });
+  return promiseGet(url).then((resp) => writeToDisk(resp));
 }
 
 export namespace ClassFileContentsRequest {
