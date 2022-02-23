@@ -75,7 +75,7 @@
     "build": "vsce package --yarn",
     "format": "prettier --write '**/*.{ts,js,json,yml}'",
     "format-check": "prettier --check '**/*.{ts,js,json,yml}'",
-    "ci": "yarn clean && yarn install && yarn build && yarn test"
+    "ci": "yarn clean && yarn install --no-progress && yarn format-check && yarn build && yarn test"
   },
   "files": [
     "extension.vsix"
