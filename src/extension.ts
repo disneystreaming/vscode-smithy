@@ -127,7 +127,7 @@ export function activate(context: ExtensionContext) {
       { scheme: "smithyjar", language: "smithy" },
     ],
     synchronize: {
-      // Notify the server about file changes to 'smithy-build.json' or 'smithy.json' files contained in the workspace
+      // Notify the server about file changes to 'smithy-build.json' files contained in the workspace
       fileEvents: workspace.createFileSystemWatcher("**/{smithy-build}.json"),
     },
   };
