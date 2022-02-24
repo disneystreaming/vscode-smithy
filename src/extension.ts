@@ -114,7 +114,7 @@ export function activate(context: ExtensionContext) {
       });
     }
 
-    return getCoursierExecutable(context.extensionPath).then((binaryPath) =>
+    return getCoursierExecutable(context.globalStoragePath).then((binaryPath) =>
       startServer(binaryPath)
     );
   }

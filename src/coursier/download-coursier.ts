@@ -2,7 +2,7 @@ import * as path from "path";
 import { https } from "follow-redirects";
 import { IncomingMessage } from "http";
 import * as fs from "fs";
-import { access } from "fs/promises";
+import { access, mkdir } from "fs/promises";
 
 export function downloadCoursierIfRequired(
   extensionPath: string,
@@ -11,6 +11,15 @@ export function downloadCoursierIfRequired(
   function binPath(filename: string) {
     return path.join(extensionPath, filename);
   }
+
+  function createDir() {
+    return mkdir(extensionPath).catch((err: { code?: string }) => {
+      return err && err.code === "EEXIST"
+        ? Promise.resolve()
+        : Promise.reject(err);
+    });
+  }
+
   const urls = {
     darwin: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-apple-darwin`,
     linux: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-linux`,
@@ -26,7 +35,9 @@ export function downloadCoursierIfRequired(
   return validBinFileExists(targetFile).then((valid) => {
     return valid
       ? targetFile
-      : downloadFile(urls[process.platform], targetFile);
+      : createDir().then(() =>
+          downloadFile(urls[process.platform], targetFile)
+        );
   });
 }
 
