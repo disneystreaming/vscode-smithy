@@ -39,6 +39,12 @@
           "default": "verbose",
           "description": "Traces the communication between VS Code and the language server."
         },
+        "smithyLsp.lspCoordinates": {
+          "scope": "window",
+          "type": "string",
+          "default": "software.amazon.smithy:smithy-language-server",
+          "description": "Language Server JAR to power the extension"
+        },
         "smithyLsp.version": {
           "scope": "window",
           "type": "string",

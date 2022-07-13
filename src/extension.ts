@@ -49,16 +49,22 @@ export function activate(context: ExtensionContext) {
 
           let port = (server.address() as net.AddressInfo).port;
 
+          let lspCoordinates = vscode.workspace
+            .getConfiguration("smithyLsp")
+            .get("lspCoordinates", "`");
+
           let version = vscode.workspace
             .getConfiguration("smithyLsp")
             .get("version", "`");
+
+          const fullCoordinates = `${lspCoordinates}:${version}`;
 
           // Downloading latest poms
           let resolveArgs = [
             "resolve",
             "--mode",
             "force",
-            "com.disneystreaming.smithy:smithy-language-server:" + version,
+            fullCoordinates,
             "-r",
             "m2local",
           ];
@@ -71,12 +77,12 @@ export function activate(context: ExtensionContext) {
             console.log("Exit code : " + exitCode);
             if (exitCode == 0) {
               console.log(
-                "Launching smithy-language-server version:" + version
+                `Launching smithy-language-server: ${fullCoordinates}`
               );
 
               let launchargs = [
                 "launch",
-                "com.disneystreaming.smithy:smithy-language-server:" + version,
+                fullCoordinates,
                 "-r",
                 "m2local",
                 "--",
