@@ -49,7 +49,7 @@
           "scope": "window",
           "type": "string",
           "default": "latest.release",
-          "description": "Version of the Smithy LSP (see https://github.com/disneystreaming/smithy-language-server)"
+          "description": "Version of the Smithy LSP (see https://github.com/awslabs/smithy-language-server)"
         }
       }
     },
