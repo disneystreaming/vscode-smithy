@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as net from "net";
-import * as fs from "fs";
 import * as child_process from "child_process";
 import { workspace, ExtensionContext } from "vscode";
 import * as vscode from "vscode";
@@ -18,6 +17,8 @@ import {
   TextDocumentIdentifier,
 } from "vscode-languageclient";
 import { getCoursierExecutable } from "./coursier/coursier";
+
+const STD_ERR_QUEUE_MAX_SIZE: number = 128;
 
 let client: LanguageClient;
 
@@ -67,6 +68,7 @@ export function activate(context: ExtensionContext) {
             resolveArgs,
             options
           );
+          const stderr: Array<string> = [];
           resolveProcess.on("exit", (exitCode) => {
             console.log("Exit code : " + exitCode);
             if (exitCode == 0) {
@@ -93,23 +95,27 @@ export function activate(context: ExtensionContext) {
                 console.log(`stdout: ${data}`);
               });
 
-              childProcess.stderr.on("data", (data) => {
+              childProcess.stderr.on("data", (data: string) => {
                 console.error(`stderr: ${data}`);
+                if (stderr.length > STD_ERR_QUEUE_MAX_SIZE) {
+                  stderr.shift();
+                }
+                stderr.push(data);
               });
 
               childProcess.on("close", (code) => {
-                console.log(`LSP exited with code ${code}`);
+                const logs = stderr.join("\n");
+                const msg = `LSP exited with code ${code}. Latest stderr: \n${logs}`;
+                reject(new Error(msg));
               });
             } else {
-              console.log(
-                `Could not resolve smithy-language-server implementation`
+              reject(
+                new Error(
+                  "Could not resolve smithy-language-server implementation."
+                )
               );
             }
           });
-
-          // Send raw output to a file
-          if (!fs.existsSync(context.storagePath))
-            fs.mkdirSync(context.storagePath);
         });
       });
     }
