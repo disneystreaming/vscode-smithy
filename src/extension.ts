@@ -70,7 +70,7 @@ export function activate(context: ExtensionContext) {
           );
           const stderr: Array<string> = [];
           resolveProcess.on("exit", (exitCode) => {
-            console.log("Exit code : " + exitCode);
+            console.log("Resolving process exit code : " + exitCode);
             if (exitCode == 0) {
               console.log(
                 "Launching smithy-language-server version:" + version
