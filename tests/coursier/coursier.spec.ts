@@ -41,3 +41,19 @@ test("download executable if path not found", () => {
     expect(path).toStrictEqual(join(tmpdir, "coursier"));
   });
 });
+
+function mockDownloadCoursierIfRequired(f: () => Promise<Array<String>>) {
+  const downloadCoursier = require("../../src/coursier/download-coursier");
+  downloadCoursier.downloadCoursierIfRequired.mockImplementation(f);
+}
+
+test("download fails returns a rejected promise", () => {
+  mockfindCoursierOnPath(() => Promise.resolve([]));
+  mockDownloadCoursierIfRequired(() =>
+    Promise.reject(new Error("Download failed."))
+  );
+
+  return getCoursierExecutable(tmpdir)
+    .then(() => fail("Expected the promise to fail."))
+    .catch((err) => expect(err.message).toStrictEqual("Download failed."));
+});
