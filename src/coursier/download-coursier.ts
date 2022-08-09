@@ -6,6 +6,7 @@ import { access, mkdir } from "fs/promises";
 
 export function downloadCoursierIfRequired(
   extensionPath: string,
+  platform: string,
   versionPath: string
 ): Promise<string> {
   function binPath(filename: string) {
@@ -20,25 +21,32 @@ export function downloadCoursierIfRequired(
     });
   }
 
-  const urls = {
-    darwin: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-apple-darwin`,
-    linux: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-linux`,
-    win32: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-win32.exe`,
-  };
-  const targets = {
-    darwin: binPath("coursier"),
-    linux: binPath("coursier"),
-    win32: binPath("coursier.exe"),
+  const supportedTargets = {
+    darwin: {
+      url: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-apple-darwin`,
+      bin: binPath("coursier"),
+    },
+    linux: {
+      url: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-linux`,
+      bin: binPath("coursier"),
+    },
+    win32: {
+      url: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-win32.exe`,
+      bin: binPath("coursier.exe"),
+    },
   };
 
-  const targetFile = targets[process.platform];
-  return validBinFileExists(targetFile).then((valid) => {
-    return valid
-      ? targetFile
-      : createDir().then(() =>
-          downloadFile(urls[process.platform], targetFile)
-        );
-  });
+  const target = supportedTargets[platform];
+  if (target === undefined) {
+    return Promise.reject(`Unsupported platform ${platform}.`);
+  } else {
+    const targetFile = target.bin;
+    return validBinFileExists(targetFile).then((valid) => {
+      return valid
+        ? targetFile
+        : createDir().then(() => downloadFile(target.url, targetFile));
+    });
+  }
 }
 
 function validBinFileExists(file: string): Promise<boolean> {

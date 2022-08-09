@@ -6,7 +6,11 @@ export function getCoursierExecutable(extensionPath: string): Promise<string> {
     if (paths.length > 0) {
       return paths[0];
     } else {
-      return downloadCoursierIfRequired(extensionPath, "v2.0.6");
+      return downloadCoursierIfRequired(
+        extensionPath,
+        process.platform,
+        "v2.0.13"
+      );
     }
   });
 }
