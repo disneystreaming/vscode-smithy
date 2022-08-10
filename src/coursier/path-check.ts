@@ -9,7 +9,6 @@ export type ExecForCode = {
 
 const defaultImpl: ExecForCode = {
   run: (execName: string, args: Array<string>, cwd: string) => {
-    console.log("real");
     return new Promise((resolve, reject) => {
       const options = { cwd };
       const resolveProcess = spawn(execName, args, options);
