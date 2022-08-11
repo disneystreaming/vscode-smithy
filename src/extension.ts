@@ -47,7 +47,14 @@ export function activate(context: ExtensionContext) {
 
       const startServer = {
         command: csBinaryPath,
-        args: ["launch", `${lspCoordinates}:${version}`, "--", "0"],
+        args: [
+          "launch",
+          `${lspCoordinates}:${version}`,
+          "--mode",
+          "force",
+          "--",
+          "0",
+        ],
       };
 
       client = new LanguageClient(
