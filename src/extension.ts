@@ -50,8 +50,8 @@ export function activate(context: ExtensionContext) {
         args: [
           "launch",
           `${lspCoordinates}:${version}`,
-          "--mode",
-          "force",
+          "--ttl",
+          "1h",
           "--",
           "0",
         ],
