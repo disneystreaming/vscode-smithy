@@ -69,11 +69,10 @@ export function activate(context: ExtensionContext) {
         workspace.registerTextDocumentContentProvider(
           "smithyjar",
           smithyContentProvider
-        )
+        ),
+        // Start the client. This will also launch the server
+        client.start()
       );
-
-      // Start the client. This will also launch the server
-      client.start();
     }
   );
 }
