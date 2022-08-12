@@ -3,9 +3,6 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as net from "net";
-import * as fs from "fs";
-import * as child_process from "child_process";
 import { workspace, ExtensionContext } from "vscode";
 import * as vscode from "vscode";
 
@@ -14,7 +11,6 @@ import {
   LanguageClient,
   LanguageClientOptions,
   RequestType,
-  StreamInfo,
   TextDocumentIdentifier,
 } from "vscode-languageclient";
 import { getCoursierExecutable } from "./coursier/coursier";
@@ -22,103 +18,6 @@ import { getCoursierExecutable } from "./coursier/coursier";
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-  function createServer(): Promise<StreamInfo> {
-    function startServer(executable: string): Promise<StreamInfo> {
-      console.log(`Executable located at ${executable}.`);
-      return new Promise((resolve, reject) => {
-        const server = net
-          .createServer((socket) => {
-            console.log("Creating server");
-
-            resolve({
-              reader: socket,
-              writer: socket,
-            });
-
-            socket.on("end", () => console.log("Disconnected"));
-          })
-          .on("error", (err) => {
-            // handle errors here
-            reject(err);
-          });
-
-        // grab a random port.
-        server.listen(() => {
-          // Start the child java process
-          let options = { cwd: context.extensionPath };
-
-          let port = (server.address() as net.AddressInfo).port;
-
-          let version = vscode.workspace
-            .getConfiguration("smithyLsp")
-            .get("version", "`");
-
-          // Downloading latest poms
-          let resolveArgs = [
-            "resolve",
-            "--mode",
-            "force",
-            "com.disneystreaming.smithy:smithy-language-server:" + version,
-            "-r",
-            "m2local",
-          ];
-          let resolveProcess = child_process.spawn(
-            executable,
-            resolveArgs,
-            options
-          );
-          resolveProcess.on("exit", (exitCode) => {
-            console.log("Exit code : " + exitCode);
-            if (exitCode == 0) {
-              console.log(
-                "Launching smithy-language-server version:" + version
-              );
-
-              let launchargs = [
-                "launch",
-                "com.disneystreaming.smithy:smithy-language-server:" + version,
-                "-r",
-                "m2local",
-                "--",
-                port.toString(),
-              ];
-
-              let childProcess = child_process.spawn(
-                executable,
-                launchargs,
-                options
-              );
-
-              childProcess.stdout.on("data", (data) => {
-                console.log(`stdout: ${data}`);
-              });
-
-              childProcess.stderr.on("data", (data) => {
-                console.error(`stderr: ${data}`);
-              });
-
-              childProcess.on("close", (code) => {
-                console.log(`LSP exited with code ${code}`);
-              });
-            } else {
-              console.log(
-                `Could not resolve smithy-language-server implementation`
-              );
-            }
-          });
-
-          // Send raw output to a file
-          if (!fs.existsSync(context.storagePath))
-            fs.mkdirSync(context.storagePath);
-        });
-      });
-    }
-
-    return getCoursierExecutable(context.globalStoragePath).then((binaryPath) =>
-      startServer(binaryPath)
-    );
-  }
-
   // Options to control the language client
   let clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
@@ -134,22 +33,48 @@ export function activate(context: ExtensionContext) {
 
   // Create the language client and start the client.
 
-  client = new LanguageClient(
-    "smithyLsp",
-    "Smithy LSP",
-    createServer,
-    clientOptions
-  );
-  const smithyContentProvider = createSmithyContentProvider(client);
-  context.subscriptions.push(
-    workspace.registerTextDocumentContentProvider(
-      "smithyjar",
-      smithyContentProvider
-    )
-  );
+  const version = vscode.workspace
+    .getConfiguration("smithyLsp")
+    .get("version", "`");
 
-  // Start the client. This will also launch the server
-  client.start();
+  const lspCoordinates = vscode.workspace
+    .getConfiguration("smithyLsp")
+    .get("lspCoordinates", "`");
+
+  return getCoursierExecutable(context.globalStoragePath).then(
+    (csBinaryPath) => {
+      console.info(`Resolved coursier's binary at ${csBinaryPath}`);
+
+      const startServer = {
+        command: csBinaryPath,
+        args: [
+          "launch",
+          `${lspCoordinates}:${version}`,
+          "--ttl",
+          "1h",
+          "--",
+          "0",
+        ],
+      };
+
+      client = new LanguageClient(
+        "smithyLsp",
+        "Smithy LSP",
+        startServer,
+        clientOptions
+      );
+
+      const smithyContentProvider = createSmithyContentProvider(client);
+      context.subscriptions.push(
+        workspace.registerTextDocumentContentProvider(
+          "smithyjar",
+          smithyContentProvider
+        ),
+        // Start the client. This will also launch the server
+        client.start()
+      );
+    }
+  );
 }
 
 export function deactivate(): Thenable<void> | undefined {
