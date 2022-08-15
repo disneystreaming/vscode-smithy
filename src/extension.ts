@@ -102,7 +102,7 @@ export function deactivate(): Thenable<void> | undefined {
 
 function parseSmithyBuild(): Thenable<SmithyBuild | null> {
   const folders = vscode.workspace.workspaceFolders;
-  if (folders.length != 1) {
+  if (!folders || folders.length != 1) {
     return Promise.resolve(null);
   } else {
     const root = folders[0].uri;
