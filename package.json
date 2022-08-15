@@ -88,7 +88,7 @@
     "extension.vsix"
   ],
   "engines": {
-    "vscode": "^1.70.0"
+    "vscode": "^1.66.0"
   },
   "dependencies": {
     "follow-redirects": "^1.14.9",
@@ -98,7 +98,7 @@
     "@types/follow-redirects": "^1.14.1",
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.21",
-    "@types/vscode": "^1.70.0",
+    "@types/vscode": "^1.66.0",
     "@typescript-eslint/parser": "^2.3.0",
     "@vscode/test-electron": "^2.1.5",
     "eslint": "^8.10.0",
