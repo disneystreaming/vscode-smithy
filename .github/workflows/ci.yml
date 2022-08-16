@@ -15,6 +15,11 @@ jobs:
       - name: Build & test
         run: yarn ci
 
+      - name: Run Integration tests
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: yarn test:it
+
   deploy:
     if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
     name: Publish
