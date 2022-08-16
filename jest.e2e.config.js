@@ -1,3 +1,4 @@
+// see https://github.com/microsoft/vscode-test/issues/37#issuecomment-700167820
 const path = require("path");
 
 module.exports = {
