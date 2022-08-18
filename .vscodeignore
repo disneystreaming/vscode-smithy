@@ -9,7 +9,6 @@
 **/tsconfig.json
 jest.config.js
 jest.e2e.config.js
-node_modules/**
 out/it/**
 out/tests/**
 src/**
