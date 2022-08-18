@@ -16,7 +16,7 @@
   "activationEvents": [
     "onLanguage:smithy"
   ],
-  "main": "./out/extension",
+  "main": "./out/src/extension",
   "contributes": {
     "configuration": {
       "type": "object",
@@ -77,6 +77,7 @@
     "watch": "tsc -watch -p ./",
     "clean": "rm -rf node_modules/ out/",
     "test": "jest",
+    "test:it": "yarn run compile && node ./out/it/runTest.js",
     "test:watch": "yarn run test --watch",
     "build": "vsce package --yarn",
     "format": "prettier --write '**/*.{ts,js,json,yml}'",
@@ -97,15 +98,15 @@
     "@types/follow-redirects": "^1.14.1",
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.21",
-    "@types/vscode": "1.43.0",
+    "@types/vscode": "^1.43.0",
     "@typescript-eslint/parser": "^2.3.0",
+    "@vscode/test-electron": "^2.1.5",
     "eslint": "^8.10.0",
     "jest": "^27.5.1",
-    "mocha": "^9.2.1",
+    "jest-environment-node": "^27.5.1",
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.3",
     "typescript": "^4.6.2",
-    "vsce": "^2.10.0",
-    "vscode-test": "^1.6.1"
+    "vsce": "^2.10.0"
   }
 }
