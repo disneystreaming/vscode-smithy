@@ -72,7 +72,7 @@
       ]
     },
     "reserved": {
-      "match": "\\b(service|operation|resource|structure|list|metadata|namespace|use|map|union|string|integer|set|blob|boolean|string|byte|short|integer|long|float|double|bigInteger|bigDecimal|timestamp|document|enum|intEnum)\\b",
+      "match": "\\b(service|operation|resource|structure|list|metadata|namespace|use|map|union|string|integer|set|blob|boolean|string|byte|short|integer|long|float|double|bigInteger|bigDecimal|timestamp|document|enum|intEnum|with|for)\\b",
       "name": "keyword.control.reserved"
     },
     "builtin": {
