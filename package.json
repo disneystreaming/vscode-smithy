@@ -50,6 +50,11 @@
           "type": "string",
           "default": "com.disneystreaming.smithy:smithy-language-server",
           "description": "Language Server JAR to power the extension"
+        },
+        "smithyLsp.lspJavaOpt": {
+          "scope": "window",
+          "type": "string",
+          "description": "Java options to be forwarded to the Language Server launch. Options should be separated by spaces."
         }
       }
     },
