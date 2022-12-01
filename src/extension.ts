@@ -5,6 +5,7 @@
 
 import { workspace, ExtensionContext } from "vscode";
 import * as vscode from "vscode";
+import { SmithyFormatter } from "smithy-formatter-api";
 
 import {
   CancellationToken,
@@ -96,6 +97,12 @@ export function activate(context: ExtensionContext) {
       clientOptions
     );
 
+    const formatterChannel = vscode.window.createOutputChannel(
+      "smithy-fmt",
+      "smithy"
+    );
+    context.subscriptions.push(formatterChannel);
+
     const smithyContentProvider = createSmithyContentProvider(client);
     context.subscriptions.push(
       workspace.registerTextDocumentContentProvider(
@@ -104,6 +111,35 @@ export function activate(context: ExtensionContext) {
       ),
       // Start the client. This will also launch the server
       client.start()
+    );
+
+    context.subscriptions.push(
+      vscode.languages.registerDocumentFormattingEditProvider(
+        { language: "smithy" },
+        {
+          provideDocumentFormattingEdits(
+            document: vscode.TextDocument
+          ): vscode.TextEdit[] {
+            var firstLine = document.lineAt(0);
+            var lastLine = document.lineAt(document.lineCount - 1);
+            var textRange = new vscode.Range(
+              firstLine.range.start,
+              lastLine.range.end
+            );
+            const content = document.getText();
+            const newContent = SmithyFormatter.format(content);
+            if (newContent.error) {
+              vscode.window.showErrorMessage(
+                "No formatting was applied, the formatter failed to parse the file."
+              );
+              formatterChannel.append(newContent.error);
+              return [];
+            } else {
+              return [vscode.TextEdit.replace(textRange, newContent.value)];
+            }
+          },
+        }
+      )
     );
   });
 }

@@ -97,6 +97,7 @@
   },
   "dependencies": {
     "follow-redirects": "^1.14.9",
+    "smithy-formatter-api": "/Users/David.Francoeur/workspace/dev/smithy-translate/test",
     "vscode-languageclient": "^6.1.4"
   },
   "devDependencies": {
