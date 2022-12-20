@@ -68,7 +68,7 @@ export function activate(context: ExtensionContext) {
 
   return Promise.all([
     getCoursierExecutable(context.globalStoragePath),
-    parseSmithyBuild(),
+    parseSmithyBuild(), registerFormatter()
   ]).then(([csBinaryPath, smithyBuild]) => {
     console.info(`Resolved coursier's binary at ${csBinaryPath}`);
 
@@ -113,6 +113,45 @@ export function deactivate(): Thenable<void> | undefined {
     return undefined;
   }
   return client.stop();
+}
+
+function fixWhitespace(line: string) {
+
+  const tooMuchWhiteSpace = /:\s{2,}/
+  const notEnoughWhiteSpace = /:\w+/
+  if (tooMuchWhiteSpace.test(line)) {
+    return line.replace(tooMuchWhiteSpace, ": ")
+  }
+  else if (notEnoughWhiteSpace.test(line)) {
+    return line.replace(':', ": ")
+  } else
+    return line
+}
+
+function registerFormatter() {
+  vscode.languages.registerDocumentFormattingEditProvider('smithy', {
+    provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.TextEdit[] {
+      let ret = []
+      let indentation = 0
+      for (let i = 0; i < document.lineCount; i++) {
+        const line = document.lineAt(i)
+        if (line.isEmptyOrWhitespace)
+          continue
+        const correctWhiteSpace = fixWhitespace(line.text)
+
+        if (line.text.includes('}')) // this is here because we want to unindent a single closed curly brace
+          indentation--
+        const indented = "\t".repeat(indentation)
+        const newLine = correctWhiteSpace.replace(/^\s+/, indented)
+        ret.push(vscode.TextEdit.replace(line.range, newLine))
+
+        if (line.text.includes('{'))
+          indentation++
+
+      }
+      return ret
+    }
+  });
 }
 
 function parseSmithyBuild(): Thenable<SmithyBuild | null> {
