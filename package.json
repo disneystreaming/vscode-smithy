@@ -97,7 +97,7 @@
   },
   "dependencies": {
     "follow-redirects": "^1.14.9",
-    "vscode-languageclient": "^6.1.4"
+    "vscode-languageclient": "^7.0.0"
   },
   "devDependencies": {
     "@types/follow-redirects": "^1.14.1",
