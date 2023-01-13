@@ -8,11 +8,12 @@ import * as vscode from "vscode";
 
 import {
   CancellationToken,
-  LanguageClient,
   LanguageClientOptions,
+  ParameterStructures,
   RequestType,
   TextDocumentIdentifier,
 } from "vscode-languageclient";
+import { LanguageClient } from "vscode-languageclient/node";
 import { getCoursierExecutable } from "./coursier/coursier";
 import { TextDecoder } from "util";
 
@@ -157,10 +158,8 @@ function createSmithyContentProvider(
 }
 
 export namespace ClassFileContentsRequest {
-  export const type = new RequestType<
-    TextDocumentIdentifier,
-    string,
-    void,
-    void
-  >("smithy/jarFileContents");
+  export const type = new RequestType<TextDocumentIdentifier, string, void>(
+    "smithy/jarFileContents",
+    ParameterStructures.auto
+  );
 }
