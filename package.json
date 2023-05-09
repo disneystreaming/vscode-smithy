@@ -73,6 +73,12 @@
         "scopeName": "source.smithy",
         "path": "./smithy.tmGrammar.json"
       }
+    ],
+    "commands": [
+      {
+        "command": "smithyLsp.restart",
+        "title": "Smithy LSP: Restart server"
+      }
     ]
   },
   "scripts": {
@@ -97,7 +103,7 @@
   },
   "dependencies": {
     "follow-redirects": "^1.14.9",
-    "vscode-languageclient": "^7.0.0"
+    "vscode-languageclient": "^8.0.0"
   },
   "devDependencies": {
     "@types/follow-redirects": "^1.14.1",

@@ -33,8 +33,6 @@ interface SmithyBuild {
   languageServer?: MavenCoordinate;
 }
 
-let client: LanguageClient;
-
 export function activate(context: ExtensionContext) {
   // Options to control the language client
   let clientOptions: LanguageClientOptions = {
@@ -70,7 +68,7 @@ export function activate(context: ExtensionContext) {
   return Promise.all([
     getCoursierExecutable(context.globalStoragePath),
     parseSmithyBuild(),
-  ]).then(([csBinaryPath, smithyBuild]) => {
+  ]).then(async ([csBinaryPath, smithyBuild]) => {
     console.info(`Resolved coursier's binary at ${csBinaryPath}`);
 
     const projectLanguageServerArtifact = smithyBuild?.languageServer;
@@ -90,30 +88,34 @@ export function activate(context: ExtensionContext) {
 
     const startServer = { command: csBinaryPath, args };
 
-    client = new LanguageClient(
+    let client = new LanguageClient(
       "smithyLsp",
       "Smithy LSP",
       startServer,
       clientOptions
     );
 
+    // Start the client. This will also launch the server.
+    await client.start();
+
     const smithyContentProvider = createSmithyContentProvider(client);
+
+    const registerRestartCommand = vscode.commands.registerCommand(
+      "smithyLsp.restart",
+      () => {
+        client.restart();
+      }
+    );
+
     context.subscriptions.push(
       workspace.registerTextDocumentContentProvider(
         "smithyjar",
         smithyContentProvider
       ),
-      // Start the client. This will also launch the server
-      client.start()
+      client,
+      registerRestartCommand
     );
   });
-}
-
-export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
-    return undefined;
-  }
-  return client.stop();
 }
 
 function parseSmithyBuild(): Thenable<SmithyBuild | null> {
