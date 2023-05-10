@@ -3,7 +3,6 @@ on:
     tags: ["v*"]
     branches: ["**"]
   pull_request:
-    branches: ["**"]
 
 name: Build and deploy
 jobs:
