@@ -79,9 +79,16 @@ export function activate(context: ExtensionContext) {
     const launcher = ["launch", finalLanguageServerArtifact];
     // m2Local is relevant when `gradle` is used to publish locally
     // coursier default resolvers are ivy2Local and maven central at the time of writing
-    const coursierOptions = ["--ttl", "1h", "--repository", "m2Local"].concat(
-      javaOptions
-    );
+    const coursierOptions = [
+      "--ttl",
+      "1h",
+      "--repository",
+      "m2Local",
+      // Necessary since the inclusion of Smithy CLI in the LS dependencies
+      "--main-class",
+      "software.amazon.smithy.lsp.Main",
+    ].concat(javaOptions);
+
     const split = ["--"];
     const lspArguments = ["0"]; // port 0 means we use std in/out to exchange with the language server
     const args = launcher.concat(coursierOptions, split, lspArguments);
