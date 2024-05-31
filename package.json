@@ -105,7 +105,8 @@
     "concat-map": "^0.0.2",
     "follow-redirects": "^1.14.9",
     "semver": "^7.5.0",
-    "vscode-languageclient": "^8.0.0"
+    "vscode-languageclient": "^8.0.0",
+    "unzip-stream": "^0.3.4"
   },
   "devDependencies": {
     "@types/follow-redirects": "^1.14.1",

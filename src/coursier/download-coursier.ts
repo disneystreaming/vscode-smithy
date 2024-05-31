@@ -4,6 +4,7 @@ import { IncomingMessage } from "http";
 import * as fs from "fs";
 import { access, mkdir } from "fs/promises";
 import * as zlib from "zlib";
+import * as unzip from "unzip-stream";
 
 export function downloadCoursierIfRequired(
   extensionPath: string,
@@ -95,7 +96,11 @@ function downloadFile(url: string, targetFile: string): Promise<string> {
         flags: "wx",
         mode: 0o755,
       });
-      response.pipe(zlib.createUnzip()).pipe(file);
+      targetFile.endsWith(".exe")
+        ? response.pipe(unzip.Parse()).on("entry", (entry) => {
+            entry.pipe(file);
+          })
+        : response.pipe(zlib.createUnzip()).pipe(file);
 
       file.on("finish", () => {
         console.log(`Finished downloaded file at ${targetFile}`);
