@@ -16,7 +16,9 @@
   "activationEvents": [
     "onLanguage:smithy"
   ],
-  "extensionKind": ["workspace"],
+  "extensionKind": [
+    "workspace"
+  ],
   "main": "./out/src/extension",
   "contributes": {
     "configuration": {
