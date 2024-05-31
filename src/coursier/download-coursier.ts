@@ -3,14 +3,14 @@ import { https } from "follow-redirects";
 import { IncomingMessage } from "http";
 import * as fs from "fs";
 import { access, mkdir } from "fs/promises";
-import * as zlib from "zlib"
+import * as zlib from "zlib";
 
 export function downloadCoursierIfRequired(
   extensionPath: string,
   platform: string,
   arch: String,
   versionPath: string,
-  versionPathArm64: String,
+  versionPathArm64: String
 ): Promise<string> {
   function binPath(filename: string) {
     return path.join(extensionPath, filename);
@@ -47,10 +47,13 @@ export function downloadCoursierIfRequired(
     linux: {
       url: `https://github.com/VirtusLab/coursier-m1/releases/download/${versionPathArm64}/cs-aarch64-pc-linux.gz`,
       bin: binPath("coursier"),
-    }
-  }
+    },
+  };
 
-  const target = arch === "arm64" ? supportedTargetsArm64[platform] : supportedTargets[platform];
+  const target =
+    arch === "arm64"
+      ? supportedTargetsArm64[platform]
+      : supportedTargets[platform];
   if (target === undefined) {
     return Promise.reject(`Unsupported platform ${platform}.`);
   } else {
