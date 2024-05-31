@@ -3,11 +3,14 @@ import { https } from "follow-redirects";
 import { IncomingMessage } from "http";
 import * as fs from "fs";
 import { access, mkdir } from "fs/promises";
+import * as zlib from "zlib"
 
 export function downloadCoursierIfRequired(
   extensionPath: string,
   platform: string,
-  versionPath: string
+  arch: String,
+  versionPath: string,
+  versionPathArm64: String,
 ): Promise<string> {
   function binPath(filename: string) {
     return path.join(extensionPath, filename);
@@ -23,20 +26,31 @@ export function downloadCoursierIfRequired(
 
   const supportedTargets = {
     darwin: {
-      url: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-apple-darwin`,
+      url: `https://github.com/coursier/launchers/raw/${versionPath}/cs-x86_64-apple-darwin.gz`,
       bin: binPath("coursier"),
     },
     linux: {
-      url: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-linux`,
+      url: `https://github.com/coursier/launchers/raw/${versionPath}/cs-x86_64-pc-linux.gz`,
       bin: binPath("coursier"),
     },
     win32: {
-      url: `https://github.com/coursier/coursier/releases/download/${versionPath}/cs-x86_64-pc-win32.exe`,
+      url: `https://github.com/coursier/launchers/raw/${versionPath}/cs-x86_64-pc-win32.zip`,
       bin: binPath("coursier.exe"),
     },
   };
 
-  const target = supportedTargets[platform];
+  const supportedTargetsArm64 = {
+    darwin: {
+      url: `https://github.com/VirtusLab/coursier-m1/releases/download/${versionPathArm64}/cs-aarch64-apple-darwin.gz`,
+      bin: binPath("coursier"),
+    },
+    linux: {
+      url: `https://github.com/VirtusLab/coursier-m1/releases/download/${versionPathArm64}/cs-aarch64-pc-linux.gz`,
+      bin: binPath("coursier"),
+    }
+  }
+
+  const target = arch === "arm64" ? supportedTargetsArm64[platform] : supportedTargets[platform];
   if (target === undefined) {
     return Promise.reject(`Unsupported platform ${platform}.`);
   } else {
@@ -78,7 +92,7 @@ function downloadFile(url: string, targetFile: string): Promise<string> {
         flags: "wx",
         mode: 0o755,
       });
-      response.pipe(file);
+      response.pipe(zlib.createUnzip()).pipe(file);
 
       file.on("finish", () => {
         console.log(`Finished downloaded file at ${targetFile}`);
