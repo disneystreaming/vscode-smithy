@@ -11,6 +11,7 @@ export function getCoursierExecutable(extensionPath: string): Promise<string> {
         process.platform,
         process.arch,
         // Have to use a commit hash for now since the launchers repository is untagged
+        // See https://github.com/coursier/coursier/issues/2998
         "56971135cd9b08eaefed13b4d6b7a95ba9cce572",
         "v2.1.10"
       );
