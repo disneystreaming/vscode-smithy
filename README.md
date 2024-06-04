@@ -91,3 +91,13 @@ Error in `Log(Extension Host)` channel:
 ```
 
 This happens because the extension exchange with the language server via std in/out of the child process. If any of the code that runs in the language server prints to the standard out, VS Code will complain (unless it is specifically formatted that way).
+
+Error in `Log(Remote Extension Host)` channel when downloading Coursier:
+
+```
+Failed to establish a socket connection to proxies extension
+```
+
+This happens when using the extension in a remote environment (e.g. devcontainers), and the proxy support is set to `override`. This can be resolved by setting this to `off`.
+
+See this related [github issue](https://github.com/microsoft/vscode-pull-request-github/issues/4624#issuecomment-1845285077) for more information.

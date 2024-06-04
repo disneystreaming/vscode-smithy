@@ -16,6 +16,9 @@
   "activationEvents": [
     "onLanguage:smithy"
   ],
+  "extensionKind": [
+    "workspace"
+  ],
   "main": "./out/src/extension",
   "contributes": {
     "configuration": {
@@ -105,6 +108,7 @@
     "concat-map": "^0.0.2",
     "follow-redirects": "^1.14.9",
     "semver": "^7.5.0",
+    "unzip-stream": "^0.3.4",
     "vscode-languageclient": "^8.0.0"
   },
   "devDependencies": {
